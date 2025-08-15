@@ -1,0 +1,97 @@
+import java.util.Arrays;
+import java.util.Random;
+
+public class Carrera {
+
+    // ---- Superclase ----
+    static abstract class Vehiculo {
+        protected final String nombre;
+        protected int distanciaRecorrida = 0;
+
+        public Vehiculo(String nombre) {
+            this.nombre = nombre;
+        }
+
+        public abstract void avanzar(Random rnd);
+
+        public String getNombre() { return nombre; }
+        public int getDistanciaRecorrida() { return distanciaRecorrida; }
+
+        @Override
+        public String toString() {
+            return nombre + " (" + getClass().getSimpleName() + ") - " + distanciaRecorrida + " m";
+        }
+    }
+
+    // ---- Subclases ----
+    static class Auto extends Vehiculo {
+        public Auto(String nombre) { super(nombre); }
+
+        @Override
+        public void avanzar(Random rnd) {
+            int paso = 12 + rnd.nextInt(19); // 12..30
+            distanciaRecorrida += paso;
+        }
+    }
+
+    static class Motito extends Vehiculo {
+        public Motito(String nombre) { super(nombre); }
+
+        @Override
+        public void avanzar(Random rnd) {
+            int paso = 10 + rnd.nextInt(25); // 10..34
+            distanciaRecorrida += paso;
+        }
+    }
+
+    // ---- Lógica de la carrera ----
+    public static void main(String[] args) {
+        Random rnd = new Random();
+
+        Vehiculo[] competidores = new Vehiculo[] {
+            new Auto("Rayo"),
+            new Motito("Veloz"),
+            new Auto("Turbo"),
+            new Motito("Ágil")
+        };
+
+        int RONDAS = 5;
+        System.out.println("=== Carrera de " + RONDAS + " rondas ===");
+        System.out.println("Competidores:");
+        for (Vehiculo v : competidores) System.out.println(" - " + v.getNombre() + " (" + v.getClass().getSimpleName() + ")");
+        System.out.println();
+
+        for (int ronda = 1; ronda <= RONDAS; ronda++) {
+            System.out.println("Ronda " + ronda + ":");
+            for (Vehiculo v : competidores) {
+                v.avanzar(rnd);
+                System.out.printf("  %-12s -> %3d m acumulados%n", v.getNombre(), v.getDistanciaRecorrida());
+            }
+            System.out.println();
+        }
+
+        int max = Arrays.stream(competidores)
+                        .mapToInt(Vehiculo::getDistanciaRecorrida)
+                        .max()
+                        .orElse(0);
+
+        Vehiculo[] ganadores = Arrays.stream(competidores)
+                                     .filter(v -> v.getDistanciaRecorrida() == max)
+                                     .toArray(Vehiculo[]::new);
+
+        System.out.println("=== Resultado final ===");
+        for (Vehiculo v : competidores) System.out.println(v);
+        System.out.println();
+
+        if (ganadores.length == 1) {
+            System.out.println("Ganador: " + ganadores[0].getNombre() + " con " + max + " m.");
+        } else {
+            System.out.print("Empate entre: ");
+            for (int i = 0; i < ganadores.length; i++) {
+                System.out.print(ganadores[i].getNombre());
+                if (i < ganadores.length - 1) System.out.print(", ");
+            }
+            System.out.println(" con " + max + " m.");
+        }
+    }
+}
